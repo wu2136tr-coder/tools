@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課程報價試算器</title>
+    <!-- 載入 Noto Sans TC 字型 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 設計語彙與變數 */
+        :root {
+            --bg-color: #f5f3ee;
+            --primary-color: #6b7fa3;
+            --primary-hover: #57698a;
+            --text-color: #3e3a36;
+            --card-bg: #ffffff;
+            --border-color: #e2ded5;
+            --warn-color: #d97706;
+            --warn-bg: #fef3c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--text-color);
+            background-color: #faf9f6;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(107, 127, 163, 0.15);
+            background-color: #ffffff;
+        }
+
+        /* 移除瀏覽器預設的 number 箭頭 */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .unit {
+            position: absolute;
+            right: 0.75rem;
+            color: #8c857b;
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        /* 驗證提示區 */
+        .warning-box {
+            display: none;
+            background-color: var(--warn-bg);
+            border-left: 4px solid var(--warn-color);
+            color: var(--warn-color);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+            font-weight: 500;
+        }
+
+        /* 結果顯示區 */
+        .result-box {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .result-label {
+            color: #7c756b;
+        }
+
+        .result-value {
+            font-weight: 500;
+        }
+
+        .result-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 1rem;
+            padding: 0.75rem 0;
+        }
+
+        .total-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .total-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* 快速重設按鈕 */
+        .reset-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .reset-btn:hover {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>課程報價試算器</h1>
+    
+    <!-- 輸入區域 -->
+    <div class="form-group">
+        <label for="students">學員人數</label>
+        <div class="input-wrapper">
+            <input type="number" id="students" min="0" placeholder="請輸入人數">
+            <span class="unit">人</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="hours">上課時數</label>
+        <div class="input-wrapper">
+            <input type="number" id="hours" min="0" step="any" placeholder="請輸入小時數">
+            <span class="unit">小時</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="price">每小時單價 (NT$)</label>
+        <div class="input-wrapper">
+            <input type="number" id="price" min="0" placeholder="請輸入單價">
+            <span class="unit">元 / 小時</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="discount">折扣率 (%)</label>
+        <div class="input-wrapper">
+            <input type="number" id="discount" min="0" max="100" step="any" placeholder="例如：10 代表打 9 折">
+            <span class="unit">%</span>
+        </div>
+    </div>
+
+    <!-- 驗證警告 -->
+    <div id="warning" class="warning-box">
+        ⚠️ 折扣率超過 30% 時，請確認此折扣是否正確
+    </div>
+
+    <!-- 輸出計算結果 -->
+    <div class="result-box">
+        <div class="result-item">
+            <span class="result-label">小計</span>
+            <span id="subtotal" class="result-value">NT$ 0</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">折扣金額</span>
+            <span id="discountAmount" class="result-value">- NT$ 0</span>
+        </div>
+        <div class="result-total">
+            <span class="total-label">總計</span>
+            <span id="total" class="total-value">NT$ 0</span>
+        </div>
+    </div>
+
+    <button type="button" class="reset-btn" id="resetBtn">清除重填</button>
+</div>
+
+<script>
+    // 取得 DOM 節點
+    const studentsInput = document.getElementById('students');
+    const hoursInput = document.getElementById('hours');
+    const priceInput = document.getElementById('price');
+    const discountInput = document.getElementById('discount');
+    
+    const warningBox = document.getElementById('warning');
+    const subtotalEl = document.getElementById('subtotal');
+    const discountAmountEl = document.getElementById('discountAmount');
+    const totalEl = document.getElementById('total');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // 格式化為台幣千分位
+    function formatCurrency(amount) {
+        return `NT$ ${Math.round(amount).toLocaleString('zh-TW')}`;
+    }
+
+    // 安全轉換輸入值，空白或非數字視為 0
+    function getSafeValue(input) {
+        const val = parseFloat(input.value);
+        return isNaN(val) || val < 0 ? 0 : val;
+    }
+
+    // 計算主邏輯
+    function calculate() {
+        const students = getSafeValue(studentsInput);
+        const hours = getSafeValue(hoursInput);
+        const price = getSafeValue(priceInput);
+        const discountRate = getSafeValue(discountInput);
+
+        // 折扣率超過 30% 驗證
+        if (discountRate > 30) {
+            warningBox.style.display = 'block';
+        } else {
+            warningBox.style.display = 'none';
+        }
+
+        // 運算
+        const subtotal = students * hours * price;
+        const discountAmount = subtotal * (discountRate / 100);
+        const total = subtotal - discountAmount;
+
+        // 輸出渲染
+        subtotalEl.textContent = formatCurrency(subtotal);
+        discountAmountEl.textContent = `- ${formatCurrency(discountAmount)}`;
+        totalEl.textContent = formatCurrency(total);
+    }
+
+    // 監聽所有輸入欄位的 input 事件以即時更新
+    [studentsInput, hoursInput, priceInput, discountInput].forEach(input => {
+        input.addEventListener('input', calculate);
+    });
+
+    // 重設按鈕事件
+    resetBtn.addEventListener('click', () => {
+        studentsInput.value = '';
+        hoursInput.value = '';
+        priceInput.value = '';
+        discountInput.value = '';
+        calculate();
+    });
+
+    // 初始化計算
+    calculate();
+</script>
+</body>
+</html>
